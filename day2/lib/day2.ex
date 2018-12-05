@@ -41,8 +41,8 @@ defmodule Day2 do
 
   def find_similar([term | list] = data) when is_list(data) do
     term_graphenes = String.graphemes(term)
+    # Find a result for this head term
     result = Enum.find_value(list, fn list_term ->
-
       list_term_graphenes = String.graphemes(list_term)
       matched = term_graphenes
       |> Enum.zip(list_term_graphenes)
@@ -59,6 +59,9 @@ defmodule Day2 do
         false
       end
     end)
+
+    # If it doesn't exist, ignore it for the rest of the evals
+    # just look for the next items match
     result || find_similar(list)
   end
 
