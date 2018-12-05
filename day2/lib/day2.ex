@@ -40,29 +40,20 @@ defmodule Day2 do
   end
 
   def find_similar([term | list] = data) when is_list(data) do
-    term_graphenes = String.graphemes(term)
-    # Find a result for this head term
     result = Enum.find_value(list, fn list_term ->
-      list_term_graphenes = String.graphemes(list_term)
-      matched = term_graphenes
-      |> Enum.zip(list_term_graphenes)
-      |> Enum.reduce("", fn {a, b}, acc ->
-        if a == b do
-          acc <> a
-        else
-          acc
-        end
-      end)
-      if String.length(matched) == Enum.count(list_term_graphenes) - 1 do
-        matched
-      else
-        false
-      end
+      common = common_string(term, list_term)
+      String.length(common) == String.length(term) - 1 && common
     end)
 
-    # If it doesn't exist, ignore it for the rest of the evals
-    # just look for the next items match
     result || find_similar(list)
+  end
+
+  def common_string(a, b) do
+    String.graphemes(a)
+    |> Enum.zip(String.graphemes(b))
+    |> Enum.reduce("", fn {t1, t2}, acc ->
+      if t1 == t2, do: acc <> t1, else: acc
+    end)
   end
 
 
