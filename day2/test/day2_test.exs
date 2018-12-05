@@ -7,4 +7,10 @@ defmodule Day2Test do
 
     assert Day2.compute(data) == 12
   end
+
+  test "finds matching id" do
+    {:ok, data} = File.read("test/test_input_2.txt")
+
+    assert Day2.find_similar(data) == "fgij"
+  end
 end

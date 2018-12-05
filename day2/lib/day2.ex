@@ -5,9 +5,15 @@ defmodule Day2 do
     compute(data)
   end
 
+  def go2 do
+    {:ok, data} = File.read("lib/input_1.txt")
+    find_similar(data)
+  end
+
   def compute(data) do
     {twices, thrices} =
       data
+      |> String.trim
       |> String.split("\n")
       |> Enum.map(fn x -> String.graphemes(x) end)
       |> Enum.reduce({0, 0}, fn x, {two_ct, three_ct} ->
@@ -24,4 +30,37 @@ defmodule Day2 do
 
     twices * thrices
   end
+
+
+  def find_similar(data) when is_binary(data) do
+    data
+    |> String.trim
+    |> String.split("\n")
+    |> find_similar
+  end
+
+  def find_similar([term | list] = data) when is_list(data) do
+    term_graphenes = String.graphemes(term)
+    result = Enum.find_value(list, fn list_term ->
+
+      list_term_graphenes = String.graphemes(list_term)
+      matched = term_graphenes
+      |> Enum.zip(list_term_graphenes)
+      |> Enum.reduce("", fn {a, b}, acc ->
+        if a == b do
+          acc <> a
+        else
+          acc
+        end
+      end)
+      if String.length(matched) == Enum.count(list_term_graphenes) - 1 do
+        matched
+      else
+        false
+      end
+    end)
+    result || find_similar(list)
+  end
+
+
 end
