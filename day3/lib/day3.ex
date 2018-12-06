@@ -1,34 +1,37 @@
 defmodule Day3 do
-  def popular_squares(data) do
-    data
-    |> String.trim
-    |> String.split("\n")
-    |> Enum.reduce(%{}, fn elf_square, acc ->
-      build_squares(elf_square)
-      |> Enum.reduce(acc, fn z, acc2 ->
-        Map.update(acc2, z, 1, fn cv -> cv + 1 end)
+  def best_claim_id(data) do
+    claims =
+      data
+      |> String.split("\n", trim: true)
+      |> Claim.parse()
+
+    board = build_board(claims)
+
+    best_claim =
+      Enum.find(claims, fn claim ->
+        Enum.filter(board, fn {_sq, cl_ids} ->
+          Enum.member?(cl_ids, claim.id)
+        end)
+        |> Enum.all?(fn {_sq, cl_ids} -> Enum.count(cl_ids) == 1 end)
       end)
-    end)
-    |> Enum.filter(fn {_, v} -> v >= 2 end)
-    |> Enum.count
+
+    best_claim.id
   end
 
-  # Pretty sure this parsing should be done via regex
-  # Still suck at those - doing string splits trims /shrug
-  def build_squares(data \\ "#1 @ 1,3: 4x4" ) do
-    [_elf_id, _sym, front_raw, back_raw] = String.split(data)
-    [x0, y0] = front_raw |> String.trim(":") |> String.split(",")
-    [dx, dy] = back_raw |> String.split("x")
-    x0 = String.to_integer(x0)
-    dx = String.to_integer(dx)
-    x_range = x0..(x0 + dx - 1)
+  def popular_squares(data) do
+    data
+    |> String.split("\n", trim: true)
+    |> Claim.parse()
+    |> build_board
+    |> Enum.count(fn {_k, v} -> Enum.count(v) >= 2 end)
+  end
 
-    y0 = String.to_integer(y0)
-    dy = String.to_integer(dy)
-    y_range = y0..(y0 + dy - 1)
-
-    Enum.reduce(x_range, [], fn x, acc ->
-      acc ++ Enum.map(y_range, fn y -> {x, y} end)
+  defp build_board(claims) do
+    claims
+    |> Enum.reduce(%{}, fn claim, board ->
+      Enum.reduce(claim.squares, board, fn sq, board ->
+        Map.update(board, sq, [claim.id], &[claim.id | &1])
+      end)
     end)
   end
 end
