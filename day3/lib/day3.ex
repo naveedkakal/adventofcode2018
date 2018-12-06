@@ -6,13 +6,17 @@ defmodule Day3 do
       |> Claim.parse()
 
     board = build_board(claims)
+    single_squares =
+      board
+      |> Enum.filter(fn {_k, v} -> Enum.count(v) == 1 end)
+      |> Enum.map(fn {sq, _z} -> sq end)
+      |> MapSet.new
 
     best_claim =
-      Enum.find(claims, fn claim ->
-        Enum.filter(board, fn {_sq, cl_ids} ->
-          Enum.member?(cl_ids, claim.id)
-        end)
-        |> Enum.all?(fn {_sq, cl_ids} -> Enum.count(cl_ids) == 1 end)
+      claims
+      |> Enum.find(fn claim ->
+        ms = MapSet.new(claim.squares)
+        MapSet.equal?(ms, MapSet.intersection(ms, single_squares))
       end)
 
     best_claim.id
